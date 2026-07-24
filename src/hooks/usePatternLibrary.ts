@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { DrumPattern } from '../models/pattern'
 import { parseMidiPatternFile } from '../services/patterns/midiPatternParser'
-import { deletePattern, listPatterns, savePattern } from '../services/storage/patternStorage'
+import { createPatternLibraryBackup, parsePatternLibraryBackup } from '../services/storage/patternLibraryBackup'
+import { deletePattern, listPatterns, savePattern, savePatterns } from '../services/storage/patternStorage'
 
 export interface PatternFilters {
   search: string
@@ -75,8 +76,33 @@ export function usePatternLibrary(onError: (message: string) => void) {
     }
   }
 
+  const exportBackup = () => {
+    const backup = createPatternLibraryBackup(patterns)
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `sr16-pattern-library-${new Date().toISOString().slice(0, 10)}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const importBackup = async (file: File): Promise<number | null> => {
+    try {
+      const backup = parsePatternLibraryBackup(await file.text())
+      await savePatterns(backup.patterns)
+      const stored = await listPatterns()
+      setPatterns(stored)
+      setSelectedId((current) => current || stored[0]?.id || '')
+      return backup.patterns.length
+    } catch (error) {
+      onError(`${file.name}: ${error instanceof Error ? error.message : 'Import failed.'}`)
+      return null
+    }
+  }
+
   return {
     patterns, filteredPatterns, selectedPattern, selectedId, setSelectedId, genres,
-    filters, setFilters, loading, importFiles, updatePattern, removePattern,
+    filters, setFilters, loading, importFiles, updatePattern, removePattern, exportBackup, importBackup,
   }
 }

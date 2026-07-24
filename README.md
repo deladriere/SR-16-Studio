@@ -78,7 +78,7 @@ src/
 
 - Standard MIDI file import for one- and two-bar drum patterns
 - Automatic bar-length detection with a manual 1/2-bar correction control
-- Local IndexedDB pattern library with search, genre/BPM filters, favorites, and deletion
+- Local IndexedDB pattern library with search, genre/BPM filters, favorites, deletion, and JSON export/import backups
 - 16-step hardware-style sequencer view; two-bar patterns use 32 steps with horizontal scrolling
 - Click-to-edit sequencer pads: empty pads add velocity-100 hits and active pads remove them without stopping playback
 - Browser-audio drum preview with BPM and loop controls
@@ -87,7 +87,8 @@ src/
 - Isolated full-step playhead synchronized by animation frames, with browser audio-output latency compensation
 - Batched MIDI monitoring, bounded rendered history, and a larger hardware-MIDI scheduling buffer
 - Persistent MIDI visual-sync calibration from -200 to +200 ms; positive values delay the cursor
-- Local persistence only: imported files and metadata are not uploaded
+- Local persistence only: imported files and metadata are not uploaded. The library belongs to the current browser profile and app address; clearing that site's browser data deletes it.
+- **Export Library** downloads a versioned JSON backup of the parsed patterns and their edits. **Import Library** validates and merges that JSON file into the local library; patterns with matching IDs are updated and other local patterns remain. Original MIDI file binaries are not included.
 
 ## Known limitations
 
@@ -103,10 +104,11 @@ src/
 
 ## Roadmap
 
-1. Documented SR-16 identity and SysEx backup/restore workflows after protocol verification.
-2. Native SR-16 pattern conversion and memory organization.
-3. Song arrangements and SR-16 song-memory workflows.
-4. Pattern reference capture/import research:
+1. Milestone 2.1: JSON library backup/restore — complete.
+2. Documented SR-16 identity and SysEx backup/restore workflows after protocol verification.
+3. Native SR-16 pattern conversion and memory organization.
+4. Song arrangements and SR-16 song-memory workflows.
+5. Pattern reference capture/import research:
    - import site-exposed MIDI files only where technically available and permitted;
    - experimental audio-to-drum transcription from user-authorized audio, kept separate from deterministic MIDI import because timing/instrument recognition is inherently approximate;
    - no bypassing site access controls, DRM, browser security boundaries, or content licensing.
@@ -118,11 +120,12 @@ src/
 3. Click **Enable MIDI** and grant MIDI/SysEx permission.
 4. Select the interface output. Leave input blank to confirm output-only mode remains usable.
 5. Set Channel 10, Note 36, Velocity 100, Duration 250 ms. Click **Send Test Note** and confirm the SR-16 plays the expected drum voice. Confirm Note On and Note Off appear as OUT rows.
-6. Send a Program Change and confirm the SR-16 changes program only according to its documented MIDI configuration.
+6. Change Bank or Drum Set and confirm the SR-16 changes program only according to its documented MIDI configuration. The selection is sent immediately; there is no separate send button.
 7. Press Start, Stop, and Continue; verify corresponding transport behavior and monitor rows. No MIDI Clock is sent.
 8. Load a known-safe `.syx` file, verify its hexadecimal display, and send it. Do not send unverified dumps to valuable SR-16 memory.
 9. Select the interface input, transmit a SysEx dump from the SR-16, confirm an IN SysEx monitor row, then use **Save received SysEx** and compare the saved bytes.
 10. Disconnect and reconnect the interface to verify the visible warning and device-list refresh.
 11. Reload the page and verify selected device IDs and test settings are restored when those ports are still available.
+12. Export the pattern library, import the JSON backup, and confirm its pattern count and edits are restored.
 
 Physical sound output, actual kit selection semantics, SR-16 response to transport/Program Change, driver naming, and real SysEx transfer cannot be validated without the drum machine and MIDI interface.

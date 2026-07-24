@@ -37,6 +37,23 @@ export const savePattern = async (pattern: DrumPattern): Promise<void> => {
   await runRequest<IDBValidKey>('readwrite', (store) => store.put(pattern))
 }
 
+export const savePatterns = async (patterns: DrumPattern[]): Promise<void> => {
+  if (!patterns.length) return
+  const database = await openDatabase()
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = database.transaction(STORE_NAME, 'readwrite')
+      const store = transaction.objectStore(STORE_NAME)
+      patterns.forEach((pattern) => store.put(pattern))
+      transaction.oncomplete = () => resolve()
+      transaction.onerror = () => reject(new Error('The pattern library operation failed.', { cause: transaction.error }))
+      transaction.onabort = () => reject(new Error('The pattern library operation was cancelled.', { cause: transaction.error }))
+    })
+  } finally {
+    database.close()
+  }
+}
+
 export const deletePattern = async (id: string): Promise<void> => {
   await runRequest<undefined>('readwrite', (store) => store.delete(id))
 }

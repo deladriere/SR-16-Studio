@@ -81,7 +81,7 @@ export function useMidiStudio() {
   }
 
   return useMemo(() => ({
-    settings, updateSettings, snapshot, messages, paused, setPaused, setMessages, error, setError, notice,
+    settings, updateSettings, snapshot, messages, paused, setPaused, setMessages, error, setError, notice, setNotice,
     receivedSysex, enable, selectInput, selectOutput, safely, service: midiService,
   }), [settings, snapshot, messages, paused, error, notice, receivedSysex])
 }

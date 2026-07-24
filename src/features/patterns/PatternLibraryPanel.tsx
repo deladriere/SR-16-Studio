@@ -1,4 +1,4 @@
-import { FolderOpen, Search, Star, Trash2 } from 'lucide-react'
+import { Download, FolderOpen, Search, Star, Trash2, Upload } from 'lucide-react'
 import { useRef } from 'react'
 import { Panel } from '../../components/Panel'
 import type { DrumPattern } from '../../models/pattern'
@@ -14,16 +14,24 @@ interface Props {
   onFilters: (filters: PatternFilters) => void
   onSelect: (id: string) => void
   onImport: (files: FileList) => void
+  onExportBackup: () => void
+  onImportBackup: (file: File) => void
   onFavorite: (pattern: DrumPattern) => void
   onRemove: (id: string) => void
 }
 
 export function PatternLibraryPanel(props: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const backupInputRef = useRef<HTMLInputElement>(null)
   return (
     <Panel title="Pattern Library" className="pattern-library pattern-library--active">
       <input ref={inputRef} type="file" accept=".mid,.midi,audio/midi,audio/x-midi" multiple hidden onChange={(event) => { if (event.target.files?.length) props.onImport(event.target.files); event.target.value = '' }} />
-      <button className="button button--secondary" onClick={() => inputRef.current?.click()}><FolderOpen size={15} />Import MIDI…</button>
+      <input ref={backupInputRef} type="file" accept="application/json,.json" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) props.onImportBackup(file); event.target.value = '' }} />
+      <div className="library-actions">
+        <button className="button button--secondary" onClick={() => inputRef.current?.click()}><FolderOpen size={15} />Import MIDI…</button>
+        <button className="button button--quiet" onClick={props.onExportBackup}><Download size={15} />Export Library</button>
+        <button className="button button--quiet" onClick={() => backupInputRef.current?.click()}><Upload size={15} />Import Library</button>
+      </div>
       <div className="search-control"><Search size={15} /><input value={props.filters.search} onChange={(event) => props.onFilters({ ...props.filters, search: event.target.value })} placeholder="Search patterns…" /></div>
       <div className="filters">
         <select aria-label="Genre filter" value={props.filters.genre} onChange={(event) => props.onFilters({ ...props.filters, genre: event.target.value })}>{props.genres.map((genre) => <option key={genre}>{genre}</option>)}</select>

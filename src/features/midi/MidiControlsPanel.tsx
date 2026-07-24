@@ -9,8 +9,8 @@ interface Props {
   programChange: ProgramChangeSettings
   onTestNoteChange: (value: TestNoteSettings) => void
   onProgramChange: (value: ProgramChangeSettings) => void
+  onSelectDrumSet: (value: ProgramChangeSettings) => void
   onSendTestNote: () => void
-  onSendProgramChange: () => void
   onTransport: (command: 'start' | 'stop' | 'continue') => void
 }
 
@@ -34,9 +34,8 @@ export function MidiControlsPanel(props: Props) {
         <h3>Drum Set</h3>
         <div className="control-line">
           <Field label="Channel"><input type="number" min="1" max="16" value={programChange.channel} onChange={(e) => props.onProgramChange({ ...programChange, channel: numberValue(e.target.value) })} /></Field>
-          <Field label="Bank"><select value={programChange.bank} onChange={(e) => props.onProgramChange({ ...programChange, bank: e.target.value as ProgramChangeSettings['bank'] })}><option value="preset">Preset</option><option value="user">User</option></select></Field>
-          <Field label="Drum Set"><select value={programChange.drumSet} onChange={(e) => props.onProgramChange({ ...programChange, drumSet: numberValue(e.target.value) })}>{Array.from({ length: 50 }, (_, drumSet) => <option key={drumSet} value={drumSet}>{drumSet.toString().padStart(2, '0')}</option>)}</select></Field>
-          <button className="button button--primary button--push" disabled={!outputReady} onClick={props.onSendProgramChange}>Select Drum Set</button>
+          <Field label="Bank"><select value={programChange.bank} onChange={(e) => props.onSelectDrumSet({ ...programChange, bank: e.target.value as ProgramChangeSettings['bank'] })}><option value="preset">Preset</option><option value="user">User</option></select></Field>
+          <Field label="Drum Set"><select value={programChange.drumSet} onChange={(e) => props.onSelectDrumSet({ ...programChange, drumSet: numberValue(e.target.value) })}>{Array.from({ length: 50 }, (_, drumSet) => <option key={drumSet} value={drumSet}>{drumSet.toString().padStart(2, '0')}</option>)}</select></Field>
         </div>
       </div>
       <div className="control-section control-section--transport">

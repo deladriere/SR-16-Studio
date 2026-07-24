@@ -73,7 +73,8 @@ select { appearance: none; padding-right: 28px; background-image: linear-gradien
 .workspace-grid .panel { display: flex; flex-direction: column; }
 .workspace-grid .panel__body { flex: 1; }
 .pattern-library .panel__body { display: grid; grid-template-rows: auto auto auto auto 1fr auto; gap: 7px; }
-.pattern-library .button { justify-self: start; }
+.library-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.library-actions .button { min-height: 30px; padding: 5px 8px; }
 .search-control { position: relative; }
 .search-control svg { position: absolute; z-index: 1; top: 10px; right: 10px; color: #707776; }
 .search-control input { width: 100%; padding-right: 32px; }
@@ -149,7 +150,6 @@ select { appearance: none; padding-right: 28px; background-image: linear-gradien
 .control-line--note .field:nth-child(4) { min-width: 94px; }
 .control-line--note .field:nth-child(4) input { width: 94px; }
 .control-line .button { min-height: 37px; margin-left: auto; }
-.button--push { margin-left: auto !important; }
 .transport-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
 .sysex-layout { display: grid; grid-template-columns: 400px minmax(420px, 1fr) 250px; gap: 32px; align-items: center; }

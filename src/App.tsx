@@ -100,6 +100,13 @@ export default function App() {
             onFilters={library.setFilters}
             onSelect={library.setSelectedId}
             onImport={(files) => void library.importFiles(files)}
+            onExportBackup={() => {
+              library.exportBackup()
+              studio.setNotice(`${library.patterns.length} ${library.patterns.length === 1 ? 'pattern' : 'patterns'} exported to a JSON backup.`)
+            }}
+            onImportBackup={(file) => void library.importBackup(file).then((count) => {
+              if (count !== null) studio.setNotice(`${count} ${count === 1 ? 'pattern' : 'patterns'} imported from the JSON library file.`)
+            })}
             onFavorite={(pattern) => void library.updatePattern(pattern.id, { favorite: !pattern.favorite })}
             onRemove={(id) => void library.removePattern(id)}
           />
@@ -132,8 +139,15 @@ export default function App() {
             programChange={studio.settings.programChange}
             onTestNoteChange={(testNote) => studio.updateSettings({ testNote })}
             onProgramChange={(programChange) => studio.updateSettings({ programChange })}
+            onSelectDrumSet={(programChange) => {
+              studio.updateSettings({ programChange })
+              if (!outputReady) return
+              studio.safely(
+                () => studio.service.sendProgramChange(programChange.channel, sr16ProgramForDrumSet(programChange.bank, programChange.drumSet)),
+                `${programChange.bank === 'preset' ? 'Preset' : 'User'} Drum Set ${programChange.drumSet.toString().padStart(2, '0')} selected.`,
+              )
+            }}
             onSendTestNote={() => studio.safely(() => studio.service.sendTestNote(studio.settings.testNote.channel, studio.settings.testNote.note, studio.settings.testNote.velocity, studio.settings.testNote.durationMs), 'Test note sent.')}
-            onSendProgramChange={() => studio.safely(() => studio.service.sendProgramChange(studio.settings.programChange.channel, sr16ProgramForDrumSet(studio.settings.programChange.bank, studio.settings.programChange.drumSet)), `${studio.settings.programChange.bank === 'preset' ? 'Preset' : 'User'} Drum Set ${studio.settings.programChange.drumSet.toString().padStart(2, '0')} selected.`)}
             onTransport={(command) => studio.safely(() => ({ start: studio.service.sendStart, stop: studio.service.sendStop, continue: studio.service.sendContinue }[command].call(studio.service)), `${command[0]?.toUpperCase()}${command.slice(1)} sent.`)}
           />
         </div>
