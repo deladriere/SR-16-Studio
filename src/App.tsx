@@ -141,6 +141,7 @@ export default function App() {
             loading={library.loading}
             onFilters={library.setFilters}
             onSelect={library.setSelectedId}
+            onCreate={() => void library.createPattern()}
             onImport={(files) => void library.importFiles(files)}
             onExportBackup={() => {
               library.exportBackup()

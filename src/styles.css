@@ -101,8 +101,8 @@ select { appearance: none; padding-right: 28px; background-image: linear-gradien
 .sequencer-panel .panel__body { min-height: 0; display: grid; grid-template-rows: auto 1fr auto; gap: 8px; padding: 8px; }
 .sequencer-actions { display: flex; gap: 6px; }
 .sequencer-actions .button { min-height: 27px; padding: 4px 9px; }
-.pattern-toolbar { display: grid; grid-template-columns: minmax(135px, 1.3fr) 74px 82px minmax(105px, 1fr) auto; gap: 6px; align-items: end; padding: 8px; border: 1px solid #343c3b; border-radius: var(--radius); background: #0c1011; }
-.pattern-toolbar--midi { grid-template-columns: minmax(125px, 1.25fr) 68px 76px minmax(95px, 1fr) 78px auto; }
+.pattern-toolbar { display: grid; grid-template-columns: minmax(120px, 1.1fr) minmax(135px, 1.3fr) 74px 82px minmax(105px, 1fr) auto; gap: 6px; align-items: end; padding: 8px; border: 1px solid #343c3b; border-radius: var(--radius); background: #0c1011; }
+.pattern-toolbar--midi { grid-template-columns: minmax(110px, 1fr) minmax(125px, 1.2fr) 68px 76px minmax(95px, 1fr) 78px auto; }
 .pattern-toolbar label { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .pattern-toolbar label > span { color: #8f9694; font: 500 11px/1 'Barlow Condensed', sans-serif; }
 .pattern-toolbar select, .pattern-toolbar input { width: 100%; min-width: 0; }

@@ -79,6 +79,8 @@ src/
 - Standard MIDI file import for one- and two-bar drum patterns
 - Automatic bar-length detection with a manual 1/2-bar correction control
 - Local IndexedDB pattern library with search, genre/BPM filters, favorites, deletion, and JSON export/import backups
+- New empty 1-bar Studio patterns can be created directly from the Pattern Library
+- Editable pattern name in the Preview toolbar, persisted to the local library
 - 16-step hardware-style sequencer view; two-bar patterns use 32 steps with horizontal scrolling
 - Click-to-edit sequencer pads: empty pads add velocity-100 hits and active pads remove them without stopping playback
 - Browser-audio drum preview with BPM and loop controls

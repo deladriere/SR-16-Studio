@@ -1,4 +1,4 @@
-import { Download, FolderOpen, Search, Star, Trash2, Upload } from 'lucide-react'
+import { Download, FolderOpen, Plus, Search, Star, Trash2, Upload } from 'lucide-react'
 import { useRef } from 'react'
 import { Panel } from '../../components/Panel'
 import type { DrumPattern } from '../../models/pattern'
@@ -13,6 +13,7 @@ interface Props {
   loading: boolean
   onFilters: (filters: PatternFilters) => void
   onSelect: (id: string) => void
+  onCreate: () => void
   onImport: (files: FileList) => void
   onExportBackup: () => void
   onImportBackup: (file: File) => void
@@ -28,6 +29,7 @@ export function PatternLibraryPanel(props: Props) {
       <input ref={inputRef} type="file" accept=".mid,.midi,audio/midi,audio/x-midi" multiple hidden onChange={(event) => { if (event.target.files?.length) props.onImport(event.target.files); event.target.value = '' }} />
       <input ref={backupInputRef} type="file" accept="application/json,.json" hidden onChange={(event) => { const file = event.target.files?.[0]; if (file) props.onImportBackup(file); event.target.value = '' }} />
       <div className="library-actions">
+        <button className="button button--secondary" onClick={props.onCreate}><Plus size={15} />New pattern</button>
         <button className="button button--secondary" onClick={() => inputRef.current?.click()}><FolderOpen size={15} />Import MIDI…</button>
         <button className="button button--quiet" onClick={props.onExportBackup}><Download size={15} />Export Library</button>
         <button className="button button--quiet" onClick={() => backupInputRef.current?.click()}><Upload size={15} />Import Library</button>
@@ -40,7 +42,7 @@ export function PatternLibraryPanel(props: Props) {
       <label className="favorite-row"><Star size={15} /><span>Favorites only</span><input type="checkbox" checked={props.filters.favoritesOnly} onChange={(event) => props.onFilters({ ...props.filters, favoritesOnly: event.target.checked })} /></label>
       <div className="pattern-list" role="listbox" aria-label="Imported patterns">
         {props.loading ? <div className="empty-state"><span>Loading local library…</span></div> : props.patterns.length === 0 ? (
-          <div className="empty-state empty-state--library"><FolderOpen size={38} /><strong>{props.totalCount ? 'No patterns match these filters' : 'No patterns imported yet'}</strong><span>{props.totalCount ? 'Adjust search or filters.' : 'Import a one- or two-bar MIDI drum loop.'}</span></div>
+          <div className="empty-state empty-state--library"><FolderOpen size={38} /><strong>{props.totalCount ? 'No patterns match these filters' : 'No patterns yet'}</strong><span>{props.totalCount ? 'Adjust search or filters.' : 'Create an empty pattern or import a MIDI drum loop.'}</span></div>
         ) : props.patterns.map((pattern) => (
           <div key={pattern.id} role="option" aria-selected={props.selectedId === pattern.id} className={`pattern-row ${props.selectedId === pattern.id ? 'is-selected' : ''}`} onClick={() => props.onSelect(pattern.id)}>
             <button className="pattern-row__main" onClick={() => props.onSelect(pattern.id)}>

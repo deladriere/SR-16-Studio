@@ -92,6 +92,7 @@ export function StepSequencer(props: Props) {
       <button className="button button--secondary" disabled={!props.canSendToSr16 || props.playing} onClick={props.onSendToSr16} title="Writes to the currently selected empty User Pattern"><Send size={13} />Send current pattern</button>
     </div>}>
       <div className={`pattern-toolbar ${props.destination === 'sr16' ? 'pattern-toolbar--midi' : ''}`}>
+        <label><span>Name</span><input type="text" value={pattern.name} onChange={(event) => props.onUpdate({ name: event.target.value })} /></label>
         <label><span>Destination</span><select value={props.destination} onChange={(event) => props.onDestination(event.target.value as PreviewDestination)}><option value="browser">Browser audio</option><option value="sr16" disabled={!props.outputReady}>SR-16 MIDI</option></select></label>
         <label><span>BPM</span><input type="number" min="40" max="260" value={pattern.bpm} onChange={(event) => props.onUpdate({ bpm: Math.max(40, Math.min(260, Number(event.target.value))) })} /></label>
         <label><span>Length</span><select value={pattern.bars} onChange={(event) => { const bars = Number(event.target.value) as 1 | 2; props.onUpdate({ bars, lengthBeats: bars * pattern.timeSignature[0] }) }}><option value="1">1 bar</option><option value="2">2 bars</option></select></label>

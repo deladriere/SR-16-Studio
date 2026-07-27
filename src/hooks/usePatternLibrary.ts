@@ -57,6 +57,31 @@ export function usePatternLibrary(onError: (message: string) => void) {
     }
   }
 
+  const createPattern = async () => {
+    const pattern: DrumPattern = {
+      id: crypto.randomUUID(),
+      name: 'New Pattern',
+      fileName: 'studio-pattern.mid',
+      bpm: 120,
+      timeSignature: [4, 4],
+      ppq: 96,
+      bars: 1,
+      lengthBeats: 4,
+      notes: [],
+      genre: 'Uncategorized',
+      favorite: false,
+      createdAt: Date.now(),
+    }
+    try {
+      await savePattern(pattern)
+      setPatterns((current) => [pattern, ...current])
+      setFilters(DEFAULT_FILTERS)
+      setSelectedId(pattern.id)
+    } catch (error) {
+      onError(error instanceof Error ? error.message : 'Could not create a new pattern.')
+    }
+  }
+
   const updatePattern = async (id: string, update: Partial<DrumPattern>) => {
     const current = patterns.find((pattern) => pattern.id === id)
     if (!current) return
@@ -103,6 +128,6 @@ export function usePatternLibrary(onError: (message: string) => void) {
 
   return {
     patterns, filteredPatterns, selectedPattern, selectedId, setSelectedId, genres,
-    filters, setFilters, loading, importFiles, updatePattern, removePattern, exportBackup, importBackup,
+    filters, setFilters, loading, createPattern, importFiles, updatePattern, removePattern, exportBackup, importBackup,
   }
 }
