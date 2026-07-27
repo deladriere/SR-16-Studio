@@ -97,7 +97,7 @@ src/
 - Browsers expose devices by the names supplied by the OS and MIDI driver.
 - Input is optional, but inbound monitoring and received-SysEx download are unavailable without it.
 - The test suite mocks formatting, validation, channel conversion, and persistence; it cannot emulate every OS MIDI driver behavior.
-- MIDI Clock, per-hit velocity editing, native SR-16 encoding, backup/restore semantics, and song arrangement are not implemented yet.
+- MIDI Clock, per-hit velocity editing, generated-pattern formats beyond the narrow guarded sender, backup/restore semantics, and song arrangement are not implemented yet.
 - The browser drum preview is a lightweight synthesized guide, not an emulation of the selected SR-16 drum set.
 - MIDI import quantizes visible notes to a 16th-note grid for preview; the stored event timing is retained.
 - The SR-16 MIDI notes are timestamp-scheduled, but the on-screen step highlight can still advance unevenly under browser/UI load; visual timing needs further work.
@@ -105,10 +105,21 @@ src/
 ## Roadmap
 
 1. Milestone 2.1: JSON library backup/restore — complete.
-2. Documented SR-16 identity and SysEx backup/restore workflows after protocol verification.
-3. Native SR-16 pattern conversion and memory organization.
-4. Song arrangements and SR-16 song-memory workflows.
-5. Pattern reference capture/import research:
+2. Read-only full-memory baseline capture — complete 2026-07-27.
+   - Captured twice with matching meaningful device memory; the only decoded difference is in a predecessor-documented `DON'T CARE` area.
+   - Do not send a full-memory dump back during protocol research: loading one overwrites all User Patterns, Songs, and Drum Sets.
+3. Alesis transport and native single-pattern event decoding — complete offline.
+   - Controlled empty, position, dynamics, and D1-D12 captures rebuild byte-for-byte from decoded fields.
+4. Narrow Studio-pattern mapping — complete offline.
+   - Supports one- and two-bar 4/4 main patterns on the exact 16th-note grid using the documented default D1-D12 MIDI assignments.
+   - Rejects unsupported notes and off-grid events instead of guessing.
+5. Guarded **Send current pattern to SR-16** workflow — complete offline.
+   - Require a selected MIDI output, SysEx permission, and explicit confirmation that the physical SR-16 is stopped on an empty User Pattern.
+6. Controlled physical validation on one empty User Pattern — complete.
+   - The corrected aligned-record packet was accepted by the SR-16, displayed its generated eight-character name, and played correctly from internal pattern memory.
+7. Document and implement guarded SR-16 backup/restore workflows.
+8. Song arrangements and SR-16 song-memory workflows.
+9. Pattern reference capture/import research:
    - import site-exposed MIDI files only where technically available and permitted;
    - experimental audio-to-drum transcription from user-authorized audio, kept separate from deterministic MIDI import because timing/instrument recognition is inherently approximate;
    - no bypassing site access controls, DRM, browser security boundaries, or content licensing.

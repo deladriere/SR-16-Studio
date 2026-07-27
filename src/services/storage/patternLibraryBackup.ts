@@ -35,6 +35,14 @@ const isDrumPattern = (value: unknown): value is DrumPattern => isRecord(value)
   && typeof value.favorite === 'boolean'
   && typeof value.createdAt === 'number' && Number.isFinite(value.createdAt) && value.createdAt >= 0
 
+const isPatternLibraryBackup = (value: unknown): value is PatternLibraryBackup => isRecord(value)
+  && value.format === PATTERN_LIBRARY_BACKUP_FORMAT
+  && value.version === PATTERN_LIBRARY_BACKUP_VERSION
+  && isNonEmptyString(value.exportedAt)
+  && Array.isArray(value.patterns)
+  && value.patterns.every(isDrumPattern)
+  && new Set(value.patterns.map((pattern) => pattern.id)).size === value.patterns.length
+
 export const createPatternLibraryBackup = (patterns: DrumPattern[]): PatternLibraryBackup => ({
   format: PATTERN_LIBRARY_BACKUP_FORMAT,
   version: PATTERN_LIBRARY_BACKUP_VERSION,
@@ -47,8 +55,8 @@ export const parsePatternLibraryBackup = (value: string): PatternLibraryBackup =
   try { parsed = JSON.parse(value) }
   catch { throw new Error('This file is not valid JSON.') }
 
-  if (!isRecord(parsed) || parsed.format !== PATTERN_LIBRARY_BACKUP_FORMAT || parsed.version !== PATTERN_LIBRARY_BACKUP_VERSION || !isNonEmptyString(parsed.exportedAt) || !Array.isArray(parsed.patterns) || !parsed.patterns.every(isDrumPattern) || new Set(parsed.patterns.map((pattern) => pattern.id)).size !== parsed.patterns.length) {
+  if (!isPatternLibraryBackup(parsed)) {
     throw new Error('This is not a valid SR-16 Studio pattern-library backup.')
   }
-  return parsed as PatternLibraryBackup
+  return parsed
 }

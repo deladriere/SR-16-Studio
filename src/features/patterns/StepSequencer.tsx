@@ -1,4 +1,4 @@
-import { Pause, Play, Square } from 'lucide-react'
+import { Pause, Play, Send, Square } from 'lucide-react'
 import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Panel } from '../../components/Panel'
 import { DRUM_LANES, noteStep, patternStepCount, togglePatternStep, type DrumPattern } from '../../models/pattern'
@@ -13,11 +13,13 @@ interface Props {
   destination: PreviewDestination
   loop: boolean
   outputReady: boolean
+  canSendToSr16: boolean
   midiSyncOffsetMs: number
   onDestination: (destination: PreviewDestination) => void
   onLoop: (loop: boolean) => void
   onPlay: () => void
   onStop: () => void
+  onSendToSr16: () => void
   onMidiSyncOffset: (offsetMs: number) => void
   onUpdate: (update: Partial<DrumPattern>) => void
 }
@@ -87,6 +89,7 @@ export function StepSequencer(props: Props) {
     <Panel title="Pattern Preview" className="pattern-preview sequencer-panel" actions={<div className="sequencer-actions">
       <button className="button button--primary" onClick={props.onPlay}>{props.playing ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}{props.playing ? 'Pause' : 'Play'}</button>
       <button className="button button--quiet" disabled={!props.playing} onClick={props.onStop}><Square size={12} fill="currentColor" />Stop</button>
+      <button className="button button--secondary" disabled={!props.canSendToSr16 || props.playing} onClick={props.onSendToSr16} title="Writes to the currently selected empty User Pattern"><Send size={13} />Send current pattern</button>
     </div>}>
       <div className={`pattern-toolbar ${props.destination === 'sr16' ? 'pattern-toolbar--midi' : ''}`}>
         <label><span>Destination</span><select value={props.destination} onChange={(event) => props.onDestination(event.target.value as PreviewDestination)}><option value="browser">Browser audio</option><option value="sr16" disabled={!props.outputReady}>SR-16 MIDI</option></select></label>

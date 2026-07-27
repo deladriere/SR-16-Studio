@@ -10,6 +10,7 @@ import { useMidiStudio } from './hooks/useMidiStudio'
 import { usePatternLibrary } from './hooks/usePatternLibrary'
 import { sr16ProgramForDrumSet } from './models/deviceProfile'
 import { PatternPlaybackService, type PreviewDestination } from './services/patterns/PatternPlaybackService'
+import { studioPatternToSr16Packet } from './services/patterns/studioPatternToSr16Sysex'
 import { sysexFileToHex, parseSysexHex } from './utils/sysex'
 import './styles.css'
 
@@ -22,6 +23,7 @@ export default function App() {
   const [previewDestination, setPreviewDestination] = useState<PreviewDestination>('browser')
   const [loopPreview, setLoopPreview] = useState(true)
   const outputReady = Boolean(studio.snapshot.selectedOutputId)
+  const generatedPatternSendReady = outputReady && studio.snapshot.sysexEnabled && studio.settings.programChange.bank === 'user'
 
   useEffect(() => () => playback.stop(), [playback])
   useEffect(() => { playback.stop(); setPlaying(false) }, [library.selectedId, playback])
@@ -52,6 +54,46 @@ export default function App() {
       setPlaying(false)
       studio.setError(caught instanceof Error ? caught.message : 'Could not start pattern preview.')
     }
+  }
+
+  const sendCurrentPatternToSr16 = () => {
+    const pattern = library.selectedPattern
+    if (!pattern) return
+    studio.setError('')
+    if (playing) {
+      studio.setError('Stop pattern preview before writing to the SR-16.')
+      return
+    }
+    if (!outputReady || !studio.snapshot.sysexEnabled) {
+      studio.setError('Select a MIDI output and enable SysEx before writing to the SR-16.')
+      return
+    }
+    if (studio.settings.programChange.bank !== 'user') {
+      studio.setError('Select a User Drum Set before building the SR-16 pattern packet.')
+      return
+    }
+
+    let packet: number[]
+    try {
+      packet = studioPatternToSr16Packet(pattern, { drumSet: studio.settings.programChange.drumSet })
+    } catch (caught) {
+      studio.setError(caught instanceof Error ? caught.message : 'Could not build the SR-16 pattern packet.')
+      return
+    }
+
+    const confirmed = window.confirm(
+      `Write “${pattern.name}” to the currently selected SR-16 User Pattern?\n\n` +
+      'Before continuing, confirm on the physical SR-16:\n' +
+      '• Playback is STOPPED\n' +
+      '• The destination is a User Pattern\n' +
+      '• The display says EMPTY PAT\n\n' +
+      'Writing to a non-empty Pattern is not safe.',
+    )
+    if (!confirmed) return
+    studio.safely(
+      () => studio.service.sendSysex(packet),
+      `Pattern “${pattern.name}” SysEx sent to the selected empty SR-16 User Pattern.`,
+    )
   }
 
   const handleLoadSysex = async (file: File) => {
@@ -117,11 +159,13 @@ export default function App() {
             destination={previewDestination}
             loop={loopPreview}
             outputReady={outputReady}
+            canSendToSr16={generatedPatternSendReady}
             midiSyncOffsetMs={studio.settings.preferences.midiSyncOffsetMs}
             onDestination={(destination) => { stopPreview(); setPreviewDestination(destination) }}
             onLoop={setLoopPreview}
             onPlay={() => void togglePreview()}
             onStop={stopPreview}
+            onSendToSr16={sendCurrentPatternToSr16}
             onMidiSyncOffset={(midiSyncOffsetMs) => {
               playback.updateVisualOffset(midiSyncOffsetMs)
               studio.updateSettings({ preferences: { ...studio.settings.preferences, midiSyncOffsetMs } })
