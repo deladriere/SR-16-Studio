@@ -2,8 +2,6 @@
 
 SR-16 Studio is a static browser-based MIDI companion for the Alesis SR-16 drum machine. It provides a local MIDI-pattern library, automatic one/two-bar detection, direct SR-16 MIDI pattern preview, and guarded writes to an empty SR-16 User Pattern.
 
-Built collaboratively with OpenAI Codex. Hardware behavior, product decisions, and SR-16 validation were directed and tested by the project author.
-
 ![SR-16 Studio pattern editor](docs/sr16-studio-screenshot.png)
 
 ## Requirements
@@ -127,3 +125,5 @@ src/
 11. Export the pattern library, import the JSON backup, and confirm its pattern count and edits are restored.
 
 Physical sound output, actual kit selection semantics, Program Change behavior, driver naming, and real SysEx transfer cannot be validated without the drum machine and MIDI interface.
+
+Built collaboratively with OpenAI Codex. Hardware behavior, product decisions, and SR-16 validation were directed and tested by the project author.

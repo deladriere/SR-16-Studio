@@ -230,6 +230,7 @@ export default function App() {
         <span className="status-spacer" />
         <span>SysEx: <strong>{studio.snapshot.sysexEnabled ? 'Ready' : 'Idle'}</strong></span>
         <span>Messages: <strong>{studio.messages.length}</strong></span>
+        <a className="repository-link" href="https://github.com/deladriere/SR-16-Studio" target="_blank" rel="noreferrer">View on GitHub</a>
       </footer>
     </div>
   )
