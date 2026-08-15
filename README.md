@@ -2,6 +2,8 @@
 
 SR-16 Studio is a static browser-based MIDI companion for the Alesis SR-16 drum machine. It provides a local MIDI-pattern library, automatic one/two-bar detection, direct SR-16 MIDI pattern preview, and guarded writes to an empty SR-16 User Pattern.
 
+[Open SR-16 Studio](https://deladriere.github.io/SR-16-Studio/)
+
 ![SR-16 Studio pattern editor](docs/sr16-studio-screenshot.png)
 
 ## Requirements
@@ -21,7 +23,7 @@ Computer MIDI OUT  --->  SR-16 MIDI IN
 SR-16 MIDI OUT  --->  Computer MIDI IN
 ```
 
-The second cable is optional. Output-only mode supports test notes, Program Change, pattern preview, and sending SysEx. A MIDI input is required only for inbound monitoring, receiving SysEx, and future backup/restore workflows.
+The second cable is optional. Output-only mode supports test notes, Program Change, pattern preview, and sending SysEx. Connect the SR-16's MIDI OUT when you want to receive and save SysEx data from the device—useful for inspecting real device messages and informing future development, such as a safe read-only memory browser. A MIDI input is required only for inbound monitoring, receiving SysEx, and future backup/restore workflows.
 
 ## Install and develop
 
