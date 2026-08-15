@@ -4,3 +4,7 @@ dist
 .DS_Store
 coverage
 *.tsbuildinfo
+.vscode/
+.env
+.env.*
+!.env.example

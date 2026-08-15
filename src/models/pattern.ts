@@ -15,7 +15,6 @@ export interface DrumPattern {
   bars: 1 | 2
   lengthBeats: number
   notes: PatternNote[]
-  genre: string
   favorite: boolean
   createdAt: number
 }

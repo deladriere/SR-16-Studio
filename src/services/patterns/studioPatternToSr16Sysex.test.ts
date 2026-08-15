@@ -13,7 +13,6 @@ const pattern = (update: Partial<DrumPattern> = {}): DrumPattern => ({
   bars: 2,
   lengthBeats: 8,
   notes: [],
-  genre: 'Test',
   favorite: false,
   createdAt: 0,
   ...update,

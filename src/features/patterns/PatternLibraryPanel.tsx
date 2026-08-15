@@ -9,7 +9,6 @@ interface Props {
   totalCount: number
   selectedId: string
   filters: PatternFilters
-  genres: string[]
   loading: boolean
   onFilters: (filters: PatternFilters) => void
   onSelect: (id: string) => void
@@ -36,7 +35,6 @@ export function PatternLibraryPanel(props: Props) {
       </div>
       <div className="search-control"><Search size={15} /><input value={props.filters.search} onChange={(event) => props.onFilters({ ...props.filters, search: event.target.value })} placeholder="Search patterns…" /></div>
       <div className="filters">
-        <select aria-label="Genre filter" value={props.filters.genre} onChange={(event) => props.onFilters({ ...props.filters, genre: event.target.value })}>{props.genres.map((genre) => <option key={genre}>{genre}</option>)}</select>
         <select aria-label="BPM filter" value={props.filters.bpm} onChange={(event) => props.onFilters({ ...props.filters, bpm: event.target.value })}><option>Any</option><option>&lt;100</option><option>100–129</option><option>130+</option></select>
       </div>
       <label className="favorite-row"><Star size={15} /><span>Favorites only</span><input type="checkbox" checked={props.filters.favoritesOnly} onChange={(event) => props.onFilters({ ...props.filters, favoritesOnly: event.target.checked })} /></label>

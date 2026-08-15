@@ -1,12 +1,8 @@
 import type { DrumPattern } from '../../models/pattern'
 import { noteStep, patternStepCount } from '../../models/pattern'
 import type { MidiService } from '../midi/MidiService'
-import { drumPreviewService } from '../audio/DrumPreviewService'
-
-export type PreviewDestination = 'browser' | 'sr16'
 
 interface PlayOptions {
-  destination: PreviewDestination
   midiChannel: number
   visualOffsetMs: number
   loop: boolean
@@ -14,10 +10,8 @@ interface PlayOptions {
   onStop: () => void
 }
 
-const BROWSER_LOOKAHEAD_MS = 100
 const MIDI_LOOKAHEAD_MS = 200
 const SCHEDULER_INTERVAL_MS = 25
-const BROWSER_START_DELAY_MS = 35
 const MIDI_START_DELAY_MS = 100
 
 interface VisualStep {
@@ -42,13 +36,12 @@ export class PatternPlaybackService {
 
   async play(pattern: DrumPattern, options: PlayOptions): Promise<void> {
     this.stop()
-    if (options.destination === 'browser') await drumPreviewService.resume()
     this.currentPattern = pattern
     this.playing = true
     this.nextStep = 0
-    this.nextStepAtMs = performance.now() + (options.destination === 'sr16' ? MIDI_START_DELAY_MS : BROWSER_START_DELAY_MS)
+    this.nextStepAtMs = performance.now() + MIDI_START_DELAY_MS
     this.visualQueue = []
-    this.visualLatencyMs = options.destination === 'browser' ? drumPreviewService.outputLatencyMs() : options.visualOffsetMs
+    this.visualLatencyMs = options.visualOffsetMs
     this.startVisualClock(options)
     this.scheduleAhead(options)
     this.schedulerTimer = window.setInterval(() => this.scheduleAhead(options), SCHEDULER_INTERVAL_MS)
@@ -81,14 +74,13 @@ export class PatternPlaybackService {
     this.animationFrame = null
     this.visualQueue = []
     this.setVisibleStep(-1)
-    drumPreviewService.cancelScheduled()
     this.currentPattern = null
     onStop?.()
   }
 
   private scheduleAhead(options: PlayOptions): void {
     if (!this.playing || !this.currentPattern) return
-    const horizon = performance.now() + (options.destination === 'sr16' ? MIDI_LOOKAHEAD_MS : BROWSER_LOOKAHEAD_MS)
+    const horizon = performance.now() + MIDI_LOOKAHEAD_MS
     let guard = 0
 
     while (this.nextStepAtMs <= horizon && guard < 256) {
@@ -112,8 +104,7 @@ export class PatternPlaybackService {
   private scheduleStep(pattern: DrumPattern, step: number, timestampMs: number, stepMs: number, options: PlayOptions): void {
     const notes = pattern.notes.filter((note) => noteStep(pattern, note) === step)
     for (const note of notes) {
-      if (options.destination === 'browser') drumPreviewService.triggerAt(note.midi, note.velocity, timestampMs)
-      else this.midiService.sendTestNote(options.midiChannel, note.midi, note.velocity, Math.max(30, Math.min(120, stepMs * 0.7)), timestampMs)
+      this.midiService.sendTestNote(options.midiChannel, note.midi, note.velocity, Math.max(30, Math.min(120, stepMs * 0.7)), timestampMs)
     }
 
     this.visualQueue.push({ step, timestampMs: timestampMs + this.visualLatencyMs })

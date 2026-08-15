@@ -49,7 +49,6 @@ export const parseMidiPattern = (buffer: ArrayBuffer, fileName: string, id: stri
     bars,
     lengthBeats: bars * numerator,
     notes,
-    genre: 'Uncategorized',
     favorite: false,
     createdAt: Date.now(),
   }

@@ -1,4 +1,3 @@
-import { FastForward, Play, Square } from 'lucide-react'
 import { Field } from '../../components/Field'
 import { Panel } from '../../components/Panel'
 import type { ProgramChangeSettings, TestNoteSettings } from '../../models/settings'
@@ -11,7 +10,8 @@ interface Props {
   onProgramChange: (value: ProgramChangeSettings) => void
   onSelectDrumSet: (value: ProgramChangeSettings) => void
   onSendTestNote: () => void
-  onTransport: (command: 'start' | 'stop' | 'continue') => void
+  canSendCurrentPattern: boolean
+  onSendCurrentPattern: () => void
 }
 
 const numberValue = (value: string) => Number.parseInt(value, 10)
@@ -31,19 +31,18 @@ export function MidiControlsPanel(props: Props) {
         </div>
       </div>
       <div className="control-section">
-        <h3>Drum Set</h3>
+        <h3>Pattern Kit Assignment</h3>
         <div className="control-line">
           <Field label="Channel"><input type="number" min="1" max="16" value={programChange.channel} onChange={(e) => props.onProgramChange({ ...programChange, channel: numberValue(e.target.value) })} /></Field>
-          <Field label="Bank"><select value={programChange.bank} onChange={(e) => props.onSelectDrumSet({ ...programChange, bank: e.target.value as ProgramChangeSettings['bank'] })}><option value="preset">Preset</option><option value="user">User</option></select></Field>
-          <Field label="Drum Set"><select value={programChange.drumSet} onChange={(e) => props.onSelectDrumSet({ ...programChange, drumSet: numberValue(e.target.value) })}>{Array.from({ length: 50 }, (_, drumSet) => <option key={drumSet} value={drumSet}>{drumSet.toString().padStart(2, '0')}</option>)}</select></Field>
+          <Field label="Kit Bank"><select value={programChange.bank} onChange={(e) => props.onSelectDrumSet({ ...programChange, bank: e.target.value as ProgramChangeSettings['bank'] })}><option value="preset">Preset</option><option value="user">User</option></select></Field>
+          <Field label="Kit Number"><select value={programChange.drumSet} onChange={(e) => props.onSelectDrumSet({ ...programChange, drumSet: numberValue(e.target.value) })}>{Array.from({ length: 50 }, (_, drumSet) => <option key={drumSet} value={drumSet}>{drumSet.toString().padStart(2, '0')}</option>)}</select></Field>
         </div>
       </div>
-      <div className="control-section control-section--transport">
-        <h3>Transport</h3>
-        <div className="transport-buttons">
-          <button className="button button--primary" disabled={!outputReady} onClick={() => props.onTransport('start')}><Play size={15} fill="currentColor" />Start</button>
-          <button className="button button--primary" disabled={!outputReady} onClick={() => props.onTransport('stop')}><Square size={13} fill="currentColor" />Stop</button>
-          <button className="button button--primary" disabled={!outputReady} onClick={() => props.onTransport('continue')}><FastForward size={15} fill="currentColor" />Continue</button>
+      <div className="control-section">
+        <h3>Pattern Memory</h3>
+        <div className="control-line control-line--memory">
+          <span>Writes to the currently selected <code>EMPTY PAT</code> User Pattern.</span>
+          <button className="button button--primary button--write-pattern" disabled={!props.canSendCurrentPattern} onClick={props.onSendCurrentPattern} title="Requires a User kit assignment and an empty User Pattern on the SR-16">Send current pattern</button>
         </div>
       </div>
     </Panel>

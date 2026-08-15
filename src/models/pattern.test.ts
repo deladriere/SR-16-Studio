@@ -3,7 +3,7 @@ import { DRUM_LANES, noteStep, togglePatternStep, type DrumPattern } from './pat
 
 const pattern: DrumPattern = {
   id: 'test', name: 'Test', fileName: 'test.mid', bpm: 120, timeSignature: [4, 4],
-  ppq: 480, bars: 1, lengthBeats: 4, notes: [], genre: 'Uncategorized', favorite: false, createdAt: 0,
+  ppq: 480, bars: 1, lengthBeats: 4, notes: [], favorite: false, createdAt: 0,
 }
 
 describe('pattern step editing', () => {

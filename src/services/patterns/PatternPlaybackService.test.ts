@@ -5,10 +5,10 @@ import { PatternPlaybackService } from './PatternPlaybackService'
 
 const basePattern: DrumPattern = {
   id: 'live-edit', name: 'Live edit', fileName: 'live.mid', bpm: 120, timeSignature: [4, 4],
-  ppq: 480, bars: 1, lengthBeats: 4, notes: [], genre: 'Uncategorized', favorite: false, createdAt: 0,
+  ppq: 480, bars: 1, lengthBeats: 4, notes: [], favorite: false, createdAt: 0,
 }
 
-const playOptions = { destination: 'sr16' as const, midiChannel: 10, visualOffsetMs: 0, loop: true }
+const playOptions = { midiChannel: 10, visualOffsetMs: 0, loop: true }
 
 describe('pattern playback live editing', () => {
   beforeEach(() => {

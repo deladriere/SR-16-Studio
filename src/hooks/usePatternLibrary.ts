@@ -6,12 +6,11 @@ import { deletePattern, listPatterns, savePattern, savePatterns } from '../servi
 
 export interface PatternFilters {
   search: string
-  genre: string
   bpm: string
   favoritesOnly: boolean
 }
 
-const DEFAULT_FILTERS: PatternFilters = { search: '', genre: 'All', bpm: 'Any', favoritesOnly: false }
+const DEFAULT_FILTERS: PatternFilters = { search: '', bpm: 'Any', favoritesOnly: false }
 
 export function usePatternLibrary(onError: (message: string) => void) {
   const [patterns, setPatterns] = useState<DrumPattern[]>([])
@@ -27,17 +26,15 @@ export function usePatternLibrary(onError: (message: string) => void) {
   }, [onError])
 
   const selectedPattern = patterns.find((pattern) => pattern.id === selectedId) ?? null
-  const genres = useMemo(() => ['All', ...Array.from(new Set(patterns.map((pattern) => pattern.genre))).sort()], [patterns])
   const filteredPatterns = useMemo(() => patterns.filter((pattern) => {
     const query = filters.search.trim().toLowerCase()
     const matchesSearch = !query || pattern.name.toLowerCase().includes(query) || pattern.fileName.toLowerCase().includes(query)
-    const matchesGenre = filters.genre === 'All' || pattern.genre === filters.genre
     const matchesFavorite = !filters.favoritesOnly || pattern.favorite
     const matchesBpm = filters.bpm === 'Any'
       || (filters.bpm === '<100' && pattern.bpm < 100)
       || (filters.bpm === '100–129' && pattern.bpm >= 100 && pattern.bpm < 130)
       || (filters.bpm === '130+' && pattern.bpm >= 130)
-    return matchesSearch && matchesGenre && matchesFavorite && matchesBpm
+    return matchesSearch && matchesFavorite && matchesBpm
   }), [patterns, filters])
 
   const importFiles = async (files: FileList | File[]) => {
@@ -68,7 +65,6 @@ export function usePatternLibrary(onError: (message: string) => void) {
       bars: 1,
       lengthBeats: 4,
       notes: [],
-      genre: 'Uncategorized',
       favorite: false,
       createdAt: Date.now(),
     }
@@ -127,7 +123,7 @@ export function usePatternLibrary(onError: (message: string) => void) {
   }
 
   return {
-    patterns, filteredPatterns, selectedPattern, selectedId, setSelectedId, genres,
+    patterns, filteredPatterns, selectedPattern, selectedId, setSelectedId,
     filters, setFilters, loading, createPattern, importFiles, updatePattern, removePattern, exportBackup, importBackup,
   }
 }

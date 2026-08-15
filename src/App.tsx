@@ -6,10 +6,11 @@ import { MidiMonitorPanel } from './features/midi/MidiMonitorPanel'
 import { PatternLibraryPanel } from './features/patterns/PatternLibraryPanel'
 import { StepSequencer } from './features/patterns/StepSequencer'
 import { SysexPanel } from './features/sysex/SysexPanel'
+import { PatternWriteConfirmDialog } from './components/PatternWriteConfirmDialog'
 import { useMidiStudio } from './hooks/useMidiStudio'
 import { usePatternLibrary } from './hooks/usePatternLibrary'
 import { sr16ProgramForDrumSet } from './models/deviceProfile'
-import { PatternPlaybackService, type PreviewDestination } from './services/patterns/PatternPlaybackService'
+import { PatternPlaybackService } from './services/patterns/PatternPlaybackService'
 import { studioPatternToSr16Packet } from './services/patterns/studioPatternToSr16Sysex'
 import { sysexFileToHex, parseSysexHex } from './utils/sysex'
 import './styles.css'
@@ -20,10 +21,10 @@ export default function App() {
   const playback = useMemo(() => new PatternPlaybackService(studio.service), [studio.service])
   const [sysexHex, setSysexHex] = useState('')
   const [playing, setPlaying] = useState(false)
-  const [previewDestination, setPreviewDestination] = useState<PreviewDestination>('browser')
   const [loopPreview, setLoopPreview] = useState(true)
+  const [pendingPatternWrite, setPendingPatternWrite] = useState<string | null>(null)
   const outputReady = Boolean(studio.snapshot.selectedOutputId)
-  const generatedPatternSendReady = outputReady && studio.snapshot.sysexEnabled && studio.settings.programChange.bank === 'user'
+  const generatedPatternSendReady = Boolean(library.selectedPattern) && outputReady && studio.snapshot.sysexEnabled && studio.settings.programChange.bank === 'user' && !playing
 
   useEffect(() => () => playback.stop(), [playback])
   useEffect(() => { playback.stop(); setPlaying(false) }, [library.selectedId, playback])
@@ -36,7 +37,7 @@ export default function App() {
   const togglePreview = async () => {
     if (playing) { stopPreview(); return }
     if (!library.selectedPattern) return
-    if (previewDestination === 'sr16' && !outputReady) {
+    if (!outputReady) {
       studio.setError('Select a MIDI output before previewing on the SR-16.')
       return
     }
@@ -44,7 +45,6 @@ export default function App() {
     setPlaying(true)
     try {
       await playback.play(library.selectedPattern, {
-        destination: previewDestination,
         midiChannel: studio.settings.testNote.channel,
         visualOffsetMs: studio.settings.preferences.midiSyncOffsetMs,
         loop: loopPreview,
@@ -73,6 +73,23 @@ export default function App() {
       return
     }
 
+    try {
+      studioPatternToSr16Packet(pattern, { drumSet: studio.settings.programChange.drumSet })
+    } catch (caught) {
+      studio.setError(caught instanceof Error ? caught.message : 'Could not build the SR-16 pattern packet.')
+      return
+    }
+
+    setPendingPatternWrite(pattern.id)
+  }
+
+  const confirmCurrentPatternWrite = () => {
+    const pattern = library.selectedPattern
+    if (!pattern || pattern.id !== pendingPatternWrite) {
+      setPendingPatternWrite(null)
+      return
+    }
+    setPendingPatternWrite(null)
     let packet: number[]
     try {
       packet = studioPatternToSr16Packet(pattern, { drumSet: studio.settings.programChange.drumSet })
@@ -80,16 +97,6 @@ export default function App() {
       studio.setError(caught instanceof Error ? caught.message : 'Could not build the SR-16 pattern packet.')
       return
     }
-
-    const confirmed = window.confirm(
-      `Write “${pattern.name}” to the currently selected SR-16 User Pattern?\n\n` +
-      'Before continuing, confirm on the physical SR-16:\n' +
-      '• Playback is STOPPED\n' +
-      '• The destination is a User Pattern\n' +
-      '• The display says EMPTY PAT\n\n' +
-      'Writing to a non-empty Pattern is not safe.',
-    )
-    if (!confirmed) return
     studio.safely(
       () => studio.service.sendSysex(packet),
       `Pattern “${pattern.name}” SysEx sent to the selected empty SR-16 User Pattern.`,
@@ -137,7 +144,6 @@ export default function App() {
             totalCount={library.patterns.length}
             selectedId={library.selectedId}
             filters={library.filters}
-            genres={library.genres}
             loading={library.loading}
             onFilters={library.setFilters}
             onSelect={library.setSelectedId}
@@ -157,16 +163,11 @@ export default function App() {
             pattern={library.selectedPattern}
             playing={playing}
             playback={playback}
-            destination={previewDestination}
             loop={loopPreview}
-            outputReady={outputReady}
-            canSendToSr16={generatedPatternSendReady}
             midiSyncOffsetMs={studio.settings.preferences.midiSyncOffsetMs}
-            onDestination={(destination) => { stopPreview(); setPreviewDestination(destination) }}
             onLoop={setLoopPreview}
             onPlay={() => void togglePreview()}
             onStop={stopPreview}
-            onSendToSr16={sendCurrentPatternToSr16}
             onMidiSyncOffset={(midiSyncOffsetMs) => {
               playback.updateVisualOffset(midiSyncOffsetMs)
               studio.updateSettings({ preferences: { ...studio.settings.preferences, midiSyncOffsetMs } })
@@ -193,7 +194,8 @@ export default function App() {
               )
             }}
             onSendTestNote={() => studio.safely(() => studio.service.sendTestNote(studio.settings.testNote.channel, studio.settings.testNote.note, studio.settings.testNote.velocity, studio.settings.testNote.durationMs), 'Test note sent.')}
-            onTransport={(command) => studio.safely(() => ({ start: studio.service.sendStart, stop: studio.service.sendStop, continue: studio.service.sendContinue }[command].call(studio.service)), `${command[0]?.toUpperCase()}${command.slice(1)} sent.`)}
+            canSendCurrentPattern={generatedPatternSendReady}
+            onSendCurrentPattern={sendCurrentPatternToSr16}
           />
         </div>
         <SysexPanel
@@ -214,6 +216,12 @@ export default function App() {
           onHistorySize={(monitorHistorySize) => studio.updateSettings({ preferences: { ...studio.settings.preferences, monitorHistorySize } })}
         />
       </main>
+      {pendingPatternWrite && library.selectedPattern?.id === pendingPatternWrite && <PatternWriteConfirmDialog
+        patternName={library.selectedPattern.name}
+        kitNumber={studio.settings.programChange.drumSet}
+        onCancel={() => setPendingPatternWrite(null)}
+        onConfirm={confirmCurrentPatternWrite}
+      />}
 
       <footer className="status-bar">
         <span className={studio.snapshot.initialized ? 'status-ok' : ''}><Radio size={14} />MIDI: <strong>{studio.snapshot.initialized ? 'Enabled' : 'Disabled'}</strong></span>

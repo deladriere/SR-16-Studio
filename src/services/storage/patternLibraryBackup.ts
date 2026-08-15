@@ -1,7 +1,7 @@
 import type { DrumPattern, PatternNote } from '../../models/pattern'
 
 export const PATTERN_LIBRARY_BACKUP_FORMAT = 'sr16-studio.pattern-library'
-export const PATTERN_LIBRARY_BACKUP_VERSION = 1
+export const PATTERN_LIBRARY_BACKUP_VERSION = 2
 
 export interface PatternLibraryBackup {
   format: typeof PATTERN_LIBRARY_BACKUP_FORMAT
@@ -31,7 +31,6 @@ const isDrumPattern = (value: unknown): value is DrumPattern => isRecord(value)
   && (value.bars === 1 || value.bars === 2)
   && typeof value.lengthBeats === 'number' && Number.isFinite(value.lengthBeats) && value.lengthBeats > 0
   && Array.isArray(value.notes) && value.notes.every(isPatternNote)
-  && isNonEmptyString(value.genre)
   && typeof value.favorite === 'boolean'
   && typeof value.createdAt === 'number' && Number.isFinite(value.createdAt) && value.createdAt >= 0
 
